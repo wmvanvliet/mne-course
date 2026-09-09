@@ -3,14 +3,12 @@
 import os
 import sys
 
-# -- Project information -----------------------------------------------------
-
+# Project information.
 project = "MNE-Python course"
 copyright = "2026"
 author = "Marijn van Vliet"
 
-# -- General configuration ---------------------------------------------------
-
+# Sphynx extensions to load.
 extensions = [
     "myst_nb",
 ]
@@ -25,11 +23,14 @@ source_suffix = {
 # Don't execute the notebooks when building the documentation.
 nb_execution_mode = "off"
 
-# -- Source files ------------------------------------------------------------
-
+# Entrypoint to the whole thing.
 master_doc = "index"
 
-# -- HTML output -------------------------------------------------------------
-
+# HTML output.
 html_theme = "sphinx_rtd_theme"
 html_title = project
+
+# Files to ignore.
+exclude_patterns = [
+    "jupyter_execute/**",
+]
