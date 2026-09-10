@@ -11,7 +11,7 @@ import mne
 
 # Data paths
 data_path = "../ds000117_pruned"
-extra_path = "../extra_data_mne"
+processed_path = "../processed"
 
 # Load the raw data.
 raw_fname = f"{data_path}/derivatives/meg_derivatives/sub-01/ses-meg/meg/sub-01_ses-meg_task-facerecognition_run-01_proc-sss_meg.fif"
@@ -72,7 +72,7 @@ epochs.shift_time(0.034)
 # Clean the epochs with ICA.
 raw_highpass = raw.copy().filter(1, None)
 ica = mne.preprocessing.ICA(0.95).fit(raw_highpass)
-ica.save(f"{extra_path}/sub-01-ica.fif", overwrite=True)
+ica.save(f"{processed_path}/sub-01-ica.fif", overwrite=True)
 epochs_clean = ica.apply(epochs)
 epochs_clean.apply_baseline()  # after ICA, we need to re-do this
 
