@@ -69,13 +69,22 @@ epochs = mne.Epochs(raw, events, event_id, tmin, tmax, baseline=baseline, preloa
 # Account for projector delay.
 epochs.shift_time(0.034)
 
-# Clean the epochs with ICA.
+# Fit an ICA model to the data.
 raw_highpass = raw.copy().filter(1, None)
-ica = mne.preprocessing.ICA(0.95).fit(raw_highpass)
+ica = mne.preprocessing.ICA(0.95, random_state=68454).fit(raw_highpass)
+
+# Mark ICA components associated with EOG and ECG artifacts.
+bads_eog, eog_scores = ica.find_bads_eog(raw_highpass)
+bads_ecg, ecg_scores = ica.find_bads_ecg(raw_highpass)
+ica.exclude = bads_eog + bads_ecg
+
+# Save the ICA model.
 ica.save(f"{processed_path}/sub-01-ica.fif", overwrite=True)
+
+# Apply the ICA to the epochs to clean the artifacts.
 epochs_clean = ica.apply(epochs)
 epochs_clean.apply_baseline()  # after ICA, we need to re-do this
 
-# Save the epochs.
+# Save the clean epochs.
 epochs_fname = raw_fname.replace('_meg.fif', '-epo.fif')  # create the file name
 epochs_clean.save(epochs_fname, overwrite=True)
