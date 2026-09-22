@@ -54,6 +54,7 @@ for run in [1, 2, 3, 4, 5, 6]:
         calibration=f"{data_path}/meg_calibration/sss_cal.data",
         cross_talk=f"{data_path}/meg_calibration/ct_sparse.fif",
         st_duration=60,
+        destination=f"{data_path}/sub-01/sub-01_ses-meg_task-facerecognition_run-03_meg.fif",
     )
 
     # Apply bandpass filter.
