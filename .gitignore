@@ -5,4 +5,8 @@ html
 jupyter_execute
 tags
 .*.swp
+data
 processed
+evokeds.pdf
+clear_headpoint.py
+mne_course_data.zip
