@@ -17,7 +17,6 @@ extensions = [
 # Allow Markdown files to be used as Sphinx source files.
 source_suffix = {
     ".rst": "restructuredtext",
-    ".md": "markdown",
     ".ipynb": "myst-nb",
 }
 

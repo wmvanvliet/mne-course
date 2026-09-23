@@ -10,6 +10,13 @@ Authors of the material::
 - Alexandre Gramfort, Inria, CEA Neurospin
 - Denis A. Engemann, Inria, CEA Neurospin
 
+Data package
+------------
+To follow along with the analysis, you will need the following data package (4.3GB):
+`download link <https://drive.google.com/file/d/1UyLeX6VLKrCf02TzkWEbTa8kuwo5evgP/view?usp=sharing>`__
+
+Unzip it somewhere you have plenty of disk space and note the location.
+
 Contents
 --------
 
