@@ -44,14 +44,12 @@ for run in [1, 2, 3, 4, 5, 6]:
     raw.drop_channels([
         "STI201", "STI301", "MISC201", "MISC202", "MISC203", "MISC204", "MISC205",
         "MISC206", "MISC301", "MISC302", "MISC303", "MISC304", "MISC305", "MISC306",
-        "CHPI001", "CHPI002", "CHPI003", "CHPI004", "CHPI005", "CHPI006", "CHPI007",
-        "CHPI008", "CHPI009"
     ])
 
     # Apply maxfilter
     raw = mne.preprocessing.maxwell_filter(
         raw,
-        calibration=f"{data_path}/meg_calibration/sss_cal.data",
+        calibration=f"{data_path}/meg_calibration/sss_cal.dat",
         cross_talk=f"{data_path}/meg_calibration/ct_sparse.fif",
         st_duration=60,
         destination=f"{data_path}/sub-01/sub-01_ses-meg_task-facerecognition_run-03_meg.fif",
