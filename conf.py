@@ -11,6 +11,7 @@ author = "Marijn van Vliet"
 # Sphynx extensions to load.
 extensions = [
     "myst_nb",
+    "sphinx_copybutton",
 ]
 
 # Allow Markdown files to be used as Sphinx source files.

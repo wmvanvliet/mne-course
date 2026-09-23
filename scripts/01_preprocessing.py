@@ -37,6 +37,9 @@ for run in [1, 2, 3, 4, 5, 6]:
                          "EEG062": "EOG062",
                          "EEG063": "ECG063"})
 
+    # Mark "bad" channels
+    raw.info["bads"] = ["EEG064"]
+
     # Set the EEG reference.
     raw.set_eeg_reference(ref_channels="average", projection=False)
 
@@ -52,7 +55,7 @@ for run in [1, 2, 3, 4, 5, 6]:
         calibration=f"{data_path}/meg_calibration/sss_cal.dat",
         cross_talk=f"{data_path}/meg_calibration/ct_sparse.fif",
         st_duration=60,
-        destination=f"{data_path}/sub-01/sub-01_ses-meg_task-facerecognition_run-03_meg.fif",
+        # destination=f"{data_path}/sub-01/sub-01_ses-meg_task-facerecognition_run-03_meg.fif",
     )
 
     # Apply bandpass filter.
