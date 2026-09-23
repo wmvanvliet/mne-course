@@ -17,8 +17,8 @@ Contents
    :maxdepth: 1
 
    Preprocessing <1-preprocessing>
-   Sensor-level analysis <2-sensor-level>
-   Time-frequency analysis <3-time-frequency>
+   Sensor-level analysis: ERP/ERF <2-sensor-level>
+   Sensor-level analysis: Time-frequency <3-time-frequency>
    Forward modelling <4-forward-modelling>
    Source estimation <5-source-level>
    Group-level analysis <6-group-level>
