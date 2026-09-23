@@ -1,5 +1,7 @@
 # MNE-Course
 
+You can find the HTML version at: https://users.aalto.fi/~vanvlm1/mne-course
+
 This repository contains the lesson materials for a multi-day MNE-Python course.
 
 Required python packages:
