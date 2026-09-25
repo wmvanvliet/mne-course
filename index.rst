@@ -31,12 +31,27 @@ Contents
    Group-level analysis <6-group-level>
    Multivariate analysis <7-multivariate>
 
+Where to go from here? 
+-----------------------
+
+After you have completed the contents of this lesson, you will know the basics of MNE-Python, but there is a lot more to learn.
+
+In the `Documentation of MNE-Python <https://mne.tools>`__, there are tutorials that go in-depth on certain topics and quick examples that show you how to do specific things.
+
+While these lesson materials focus on how to technically make MNE-Python do certain computations, it is important to know what those computations are, what purpose they serve, and how to interpret the results.
+For this, we recommend taking a proper university-level neuroimaging course, such as:
+Aalto University: `NBE-E4045 Functional Brain Imaging D (5 cr) <https://sisu.aalto.fi/student/courseunit/otm-ef8f2dea-edd6-4651-8702-f61dedaa9c2c/brochure>`__. 
+
+To get started with your own data analysis pipelines, it is helpful to have an example pipeline to copy from.
+`This git repository <https://version.aalto.fi/gitlab/biomag-pipelines/mne-standard/-/tree/minimal?ref_type=heads>`__ contains such an example pipeline, in three flavors: minimal, advanced, and expert.
+Each flavor adds more bells and whistles to the pipeline to make it more complete and robust.
+
 References and credit
 ~~~~~~~~~~~~~~~~~~~~~
 
 The code from this tutorial is heavily inspired from this article:
 
-*Mainak Jas, Eric Larson, Denis Engemann, Jaakko Leppakangas, Samu Taulu, Matti Hamalainen,
+*Mainak Jas, Eric Larson, Denis Engemann, Jaakko Leppakangas, Samu Taulu, Matti Hämäläinen,
 and Alexandre Gramfort. 2018. A Reproducible MEG/EEG Group Study With the MNE Software:
 Recommendations, Quality Assessments, and Good Practices.
 Frontiers in Neuroscience. 12, doi: 10.3389/fnins.2018.00530*
