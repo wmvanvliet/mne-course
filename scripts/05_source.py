@@ -40,12 +40,17 @@ fig_rank.savefig(f"{figure_path}/sub-01/sub-01_cov_rank.pdf")
 del epochs
 
 # Load the evokeds.
-evokeds = mne.read_evokeds(f"{processed_path}/sub-01/sub-01_ave.fif")
+evokeds = mne.read_evokeds(f"{processed_path}/sub-01/sub-01_list-ave.fif")
 
 # Compute the inverse operator.
 fwd = mne.read_forward_solution(f"{processed_path}/sub-01/sub-01_fwd.fif")
 info = evokeds[0].info
 inv = mne.minimum_norm.make_inverse_operator(info, fwd, noise_cov, loose=0.2, depth=0.8)
+
+# Prepare morphing to fsaverage template brain.
+morph = mne.compute_source_morph(
+    inv["src"], subject_from="sub-01", subject_to="fsaverage", subjects_dir=subjects_dir
+)
 
 # Perform source estimation.
 for ev in evokeds:
@@ -53,4 +58,10 @@ for ev in evokeds:
     ev.set_eeg_reference("average", projection=True)  # needed for EEG source estimation
     ev.info["bads"] = ["EEG002"]
     stc = mne.minimum_norm.apply_inverse(ev, inv, lambda2=1 / 9, method="dSPM")
-    stc.save(f"{processed_path}/sub-01/sub-01_{condition}_stc", overwrite=True)
+    stc.save(f"{processed_path}/sub-01/sub-01_{condition}", overwrite=True)
+
+    # Morph to fsaverag template brain.
+    stc_fsaverage = morph.apply(stc)
+    stc_fsaverage.save(
+        f"{processed_path}/sub-01/sub-01_{condition}_fsaverage", overwrite=True
+    )

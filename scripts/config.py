@@ -1,0 +1,201 @@
+"""
+===========
+Config file
+===========
+
+Configuration parameters for the study.
+"""
+
+import getpass
+import os
+from socket import getfqdn
+
+import pandas as pd
+from filename_templates import FileNames
+
+########################################################################################
+# System setup. SET THIS TO MATCH YOUR OWN SYSTEM.
+########################################################################################
+
+user = getpass.getuser()  # Username of the user running the scripts
+host = getfqdn()  # Hostname of the machine running the scripts
+
+# You want to add your machine to this list.
+# orig_data_path - Folder containing the original data recorded during the project.
+# bids_path - Folder containing the BIDS version of the data.
+# processed_data_path - Folder to write the processed MEG data to.
+# subject_dir - Folder for the MRIs that have been processed with FreeSurfer
+# n_jobs - number of CPU cores to use
+if host == "deepthought1" and user == "vanvlm1":
+    # Marijn's workstation
+    data_path = "/m/nbe/scratch/conpy/ds000117"
+    processed_path = "../processed"
+    reports_path = "../reports"
+    subjects_dir = "/m/nbe/scratch/conpy/ds000117/derivatives/freesurfer"
+    n_jobs = 32
+elif "marijn-laptop" in host and user == "vanvlm1":
+    # Marijn's Linux laptop:
+    data_path = "/m/nbe/scratch/conpy/ds000117"
+    processed_path = "../processed"
+    reports_path = "../reports"
+    subjects_dir = "/m/nbe/scratch/conpy/ds000117/derivatives/freesurfer"
+    n_jobs = 14
+    os.environ["QT_QPA_PLATFORM"] = "xcb"  # needed for 3d graphics to work
+else:
+    raise ValueError(f"Please add your system to config.py ({user=} {host=}).")
+
+# For numpy to use the right amount of cores
+os.environ["OMP_NUM_THREADS"] = str(n_jobs)
+
+
+########################################################################################
+# Experiment design: subjects, session, runs, tasks, event codes, etc.
+########################################################################################
+
+# The subjects to include in the analysis pipeline. You can comment-out subjects to
+# remove them from the analysis if there was some problem with the data.
+subjects = [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+]
+
+# "Runs" are blocks of trials, run during the same session. For example, all the trials
+# before the participant took a break could be a "run". "Tasks" are different
+# experimental paradigms. We often have a different number of runs per task.
+runs = [1, 2, 3, 4, 5, 6]
+
+# Events and their trigger-codes.
+# "description of the event": trigger-code
+event_id = {
+    "face/famous/first": 5,
+    "face/famous/immediate": 6,
+    "face/famous/long": 7,
+    "face/unfamiliar/first": 13,
+    "face/unfamiliar/immediate": 14,
+    "face/unfamiliar/long": 15,
+    "scrambled/first": 17,
+    "scrambled/immediate": 18,
+    "scrambled/long": 19,
+}
+
+# Names for the experimental conditions (don't use "/" in condition names) and the
+# events to use for each condition.
+conditions = ["face", "unfamiliar", "famous", "scrambled"]
+
+# Manually defined bad channels.
+bad_channels = [
+    dict(subject=1, run=1, channels=["EEG064"]),
+    dict(subject=1, run=2, channels=["EEG064"]),
+    dict(subject=1, run=3, channels=["EEG064"]),
+    dict(subject=1, run=4, channels=["EEG064"]),
+    dict(subject=1, run=5, channels=["EEG064"]),
+    dict(subject=1, run=6, channels=["EEG064"]),
+]
+bad_channels = pd.DataFrame(bad_channels).explode("channels")
+
+
+########################################################################################
+# Common parameters used in multiple analysis scripts.
+########################################################################################
+
+# Bandpass filter to apply.
+bandpass = (0.05, 40)
+
+# Resample to this frequency.
+resample = 300
+
+# The baseline window for the epochs.
+epochs_window = (-0.2, 2.0)  # in seconds relative to stimulus onset
+baseline = (-0.2, 0)  # in seconds relative to stimulus onset
+
+# Source "spacing" controlling the resolution of the source estimate.
+# Common choices fow a "low" resolution are: "ico4" or "oct5"
+# Common choices fow a "high" resolution are: "ico5" or "oct6"
+spacing = "ico4"
+
+########################################################################################
+# Templates for filenames.
+#
+# These are all the filenames used in the analysis in one place. Try to be consistent
+# and always define your filenames here, instead of in individual analysis scripts.
+# See here for documentation on how these templates work:
+# https://github.com/wmvanvliet/filename-templates#filename-templates
+#
+# In short:
+#  - Placeholders, such as `{subject}`, become parameters for the filename function.
+#  - Placeholders that already exist as a filename alias, such as `{data_path}`, are
+#    filled automatically.
+#  - Placeholders follow Python's string formatting syntax.
+#    For example: `{subject:02d}` means a zero-padded number.
+#    See: https://docs.python.org/3/library/string.html#format-examples
+########################################################################################
+
+
+fname = FileNames()
+# fmt: off
+# ruff: disable[E501]
+
+# These are the folders specified at the top of this config file.
+# `mkdir=True` means that the folder will be created if it doesn't exist yet.
+fname.add("data_path", data_path)
+fname.add("processed_path", processed_path, mkdir=True)
+fname.add("reports_path", reports_path, mkdir=True)
+fname.add("subjects_dir", subjects_dir, mkdir=True)
+
+# Original raw data.
+fname.add("raw", "{data_path}/sub-{subject:02d}/ses-meg/meg/sub-{subject:02d}_ses-meg_task-facerecognition_run-{run:02d}_meg.fif")
+
+# Scanner-specific calibration files, after BIDS conversion.
+fname.add("calibration", "{data_path}/derivatives/meg_derivatives/sss_cal.dat")
+fname.add("cross_talk", "{data_path}/derivatives/meg_derivatives/ct_sparse.fif")
+
+# Files produced by our analysis.
+fname.add("epochs", "{processed_path}/sub-{subject:02d}/sub-{subject:02d}_run-{run:02d}_epo.fif", mkdir=True)
+fname.add("ica", "{processed_path}/sub-{subject:02d}/sub-{subject:02d}_run-{run:02d}_ica.fif", mkdir=True)
+fname.add("evokeds", "{processed_path}/sub-{subject:02d}_list-ave.fif", mkdir=True)
+fname.add("power", "{processed_path}/sub-{subject:02d}/sub-{subject:02d}_power.h5", mkdir=True)
+fname.add("itc", "{processed_path}/sub-{subject:02d}/sub-{subject:02d}_itc.h5", mkdir=True)
+fname.add("bem_sol", "{processed_path}/sub-{subject:02d}/sub-{subject:02d}_bem-sol.fif", mkdir=True)
+fname.add("trans", "{processed_path}/sub-{subject:02d}/sub-{subject:02d}_trans.fif", mkdir=True)
+fname.add("src", "{processed_path}/sub-{subject:02d}/sub-{subject:02d}_src.fif", mkdir=True)
+fname.add("fwd", "{processed_path}/sub-{subject:02d}/sub-{subject:02d}_fwd.fif", mkdir=True)
+fname.add("noise_cov", "{processed_path}/sub-{subject:02d}/sub-{subject:02d}_cov.fif", mkdir=True)
+fname.add("inv", "{processed_path}/sub-{subject:02d}/sub-{subject:02d}_inv.fif", mkdir=True)
+fname.add("stc", "{processed_path}/sub-{subject:02d}/sub-{subject:02d}_cond-{condition}", mkdir=True)
+fname.add("stc_hemi", "{processed_path}/sub-{subject:02d}/sub-{subject:02d}_cond-{condition}-{hemi}.stc", mkdir=True)
+fname.add("stc_morphed", "{processed_path}/sub-{subject:02d}/sub-{subject:02d}_cond-{condition}_morphed", mkdir=True)
+fname.add("stc_morphed_hemi", "{processed_path}/sub-{subject:02d}/sub-{subject:02d}_cond-{condition}_morphed-{hemi}.stc", mkdir=True)
+fname.add("ga_evokeds", "{processed_path}/grand_average/grand_average_list-ave.fif", mkdir=True)
+fname.add("ga_stc", "{processed_path}/grand_average/grand_average_cond-{condition}", mkdir=True)
+fname.add("ga_stc_hemi", "{processed_path}/grand_average/grand_average_cond-{condition}-{hemi}.stc", mkdir=True)
+
+# HTML reports
+fname.add("report", "{reports_path}/sub-{subject:02d}_report.h5", mkdir=True)
+fname.add("report_html", "{reports_path}/sub-{subject:02d}_report.html", mkdir=True)
+fname.add("ga_report", "{reports_path}/grand_average_report.h5", mkdir=True)
+fname.add("ga_report_html", "{reports_path}/grand_average_report.html", mkdir=True)
+
+# Misc.
+fname.add("system_check", "./.system_check.txt")
+
+# fmt: on
+# ruff: enable[E501]
+
+# Add `subjects_dir` as an environment variable for convenience. This way, you don't
+# have to specify `subjects_dir=subjects_dir` all the time when using MNE-Python
+# functions.
+os.environ["SUBJECTS_DIR"] = subjects_dir
