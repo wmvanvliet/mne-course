@@ -8,7 +8,6 @@ Step 4: create the forward model.
 """
 
 import mne
-import numpy as np
 
 # Data paths
 data_path = "../data"
