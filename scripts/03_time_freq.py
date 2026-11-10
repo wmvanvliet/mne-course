@@ -44,19 +44,24 @@ power, itc = epochs.compute_tfr(
 power.crop(-0.45, 1.6)
 itc.crop(-0.45, 1.6)
 
+# Saving.
+power.save(f"{processed_path}/sub-01/sub-01_power.h5", overwrite=True)
+itc.save(f"{processed_path}/sub-01/sub-01_itc.h5", overwrite=True)
+
 # Create a summary figure of the TFR.
 fig = power.plot_topo(
     baseline=[-0.45, -0.1],
     mode="meanlogratio",
     title="Average power",
 )
+fig.set_size_inches(20, 15)
 fig.savefig(f"{figure_path}/sub-01/power.pdf")
 
 # Create a summary figure of the ITC.
-fig = power.plot_topo(
+fig = itc.plot_topo(
     baseline=[-0.45, -0.1],
     mode="meanlogratio",
-    title="Average power",
+    title="Inter-trial coherence",
 )
-fig.set_figsize_inches((20, 15))
+fig.set_size_inches(20, 15)
 fig.savefig(f"{figure_path}/sub-01/itc.pdf")

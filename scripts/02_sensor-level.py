@@ -32,6 +32,8 @@ for condition in ["face", "scrambled", "famous", "unfamiliar"]:
     ev.comment = condition
     evokeds.append(ev)
 
+# Save the evokeds.
+mne.write_evokeds(f"{processed_path}/sub-01/sub-01_ave.fif", evokeds, overwrite=True)
 
 # Create a 3x4 grid of panels, which matplotlib calls "axes".
 fig, axes = plt.subplots(
