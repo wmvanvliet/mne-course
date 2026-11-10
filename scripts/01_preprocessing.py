@@ -9,8 +9,10 @@ Step 1: Load the raw data and perform preprocessing.
 - Cut epochs
 - Apply ICA to clean the epochs
 """
-import mne
+
 import os
+
+import mne
 
 # Data paths
 data_path = "../data"
@@ -23,19 +25,23 @@ for run in [1, 2, 3, 4, 5, 6]:
     print(f"Processing run {run}...")
 
     # Load the raw data.
-    raw_fname = f"{data_path}/sub-01/sub-01_ses-meg_task-facerecognition_run-0{run}_meg.fif"
+    raw_fname = (
+        f"{data_path}/sub-01/sub-01_ses-meg_task-facerecognition_run-0{run}_meg.fif"
+    )
     raw = mne.io.read_raw(raw_fname, preload=True)
 
     # Set channel types.
-    raw.set_channel_types({"EEG061": "eog",  # actually EOG not EEG
-                           "EEG062": "eog",  # actually EOG not EEG
-                           "EEG063": "ecg",  # actually ECG not EEG
-                           "EEG064": "misc"})  # EEG064 free-floating electrode
+    raw.set_channel_types(
+        {
+            "EEG061": "eog",  # actually EOG not EEG
+            "EEG062": "eog",  # actually EOG not EEG
+            "EEG063": "ecg",  # actually ECG not EEG
+            "EEG064": "misc",
+        }
+    )  # EEG064 free-floating electrode
 
     # We also rename the EOG and ECG channels.
-    raw.rename_channels({"EEG061": "EOG061",
-                         "EEG062": "EOG062",
-                         "EEG063": "ECG063"})
+    raw.rename_channels({"EEG061": "EOG061", "EEG062": "EOG062", "EEG063": "ECG063"})
 
     # Mark "bad" channels
     raw.info["bads"] = ["EEG064"]
@@ -44,10 +50,24 @@ for run in [1, 2, 3, 4, 5, 6]:
     raw.set_eeg_reference(ref_channels="average", projection=False)
 
     # Drop some superfluous channels.
-    raw.drop_channels([
-        "STI201", "STI301", "MISC201", "MISC202", "MISC203", "MISC204", "MISC205",
-        "MISC206", "MISC301", "MISC302", "MISC303", "MISC304", "MISC305", "MISC306",
-    ])
+    raw.drop_channels(
+        [
+            "STI201",
+            "STI301",
+            "MISC201",
+            "MISC202",
+            "MISC203",
+            "MISC204",
+            "MISC205",
+            "MISC206",
+            "MISC301",
+            "MISC302",
+            "MISC303",
+            "MISC304",
+            "MISC305",
+            "MISC306",
+        ]
+    )
 
     # Apply maxfilter
     raw = mne.preprocessing.maxwell_filter(
@@ -55,7 +75,7 @@ for run in [1, 2, 3, 4, 5, 6]:
         calibration=f"{data_path}/meg_calibration/sss_cal.dat",
         cross_talk=f"{data_path}/meg_calibration/ct_sparse.fif",
         st_duration=60,
-        # destination=f"{data_path}/sub-01/sub-01_ses-meg_task-facerecognition_run-03_meg.fif",
+        destination=f"{data_path}/sub-01/sub-01_ses-meg_task-facerecognition_run-03_meg.fif",
     )
 
     # Apply bandpass filter.
@@ -98,7 +118,9 @@ for run in [1, 2, 3, 4, 5, 6]:
     tmax = 2.0  # end of each epoch (2000ms after the trigger)
     baseline = (-0.2, 0)  # means from 200ms before to stim onset (t = 0)
 
-    epochs = mne.Epochs(raw, events, event_id, tmin, tmax, baseline=baseline, preload=True)
+    epochs = mne.Epochs(
+        raw, events, event_id, tmin, tmax, baseline=baseline, preload=True
+    )
 
     # Account for projector delay.
     epochs.shift_time(0.034)
@@ -108,4 +130,6 @@ for run in [1, 2, 3, 4, 5, 6]:
     epochs_clean.apply_baseline()  # after ICA, we need to re-do this
 
     # Save the clean epochs.
-    epochs_clean.save(f"{processed_path}/sub-01/sub-01_run-0{run}_epo.fif", overwrite=True)
+    epochs_clean.save(
+        f"{processed_path}/sub-01/sub-01_run-0{run}_epo.fif", overwrite=True
+    )
