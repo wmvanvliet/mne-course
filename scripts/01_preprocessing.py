@@ -81,7 +81,7 @@ raw.drop_channels(
 raw = mne.preprocessing.maxwell_filter(
     raw,
     calibration=fname.calibration,
-    cross_talk=fname.crosstalk,
+    cross_talk=fname.cross_talk,
     st_duration=60,
     destination=fname.raw(run=3),
 )

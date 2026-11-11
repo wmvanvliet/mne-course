@@ -11,3 +11,5 @@ figures
 evokeds.pdf
 clear_headpoint.py
 mne_course_data.zip
+__pycache__
+.doit.db
