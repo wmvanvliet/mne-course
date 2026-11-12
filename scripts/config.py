@@ -159,6 +159,9 @@ fname.add("subjects_dir", subjects_dir, mkdir=True)
 # Original raw data.
 fname.add("raw", "{data_path}/sub-{subject:02d}/ses-meg/meg/sub-{subject:02d}_ses-meg_task-facerecognition_run-{run:02d}_meg.fif")
 
+# Freesurfer surfaces.
+fname.add("surface", "{subjects_dir}/sub-{subject:02d}/bem/{surface}.surf")
+
 # Scanner-specific calibration files, after BIDS conversion.
 fname.add("calibration", "{data_path}/derivatives/meg_derivatives/sss_cal.dat")
 fname.add("cross_talk", "{data_path}/derivatives/meg_derivatives/ct_sparse.fif")
@@ -177,8 +180,8 @@ fname.add("noise_cov", "{processed_path}/sub-{subject:02d}/sub-{subject:02d}_cov
 fname.add("inv", "{processed_path}/sub-{subject:02d}/sub-{subject:02d}_inv.fif", mkdir=True)
 fname.add("stc", "{processed_path}/sub-{subject:02d}/sub-{subject:02d}_cond-{condition}", mkdir=True)
 fname.add("stc_hemi", "{processed_path}/sub-{subject:02d}/sub-{subject:02d}_cond-{condition}-{hemi}.stc", mkdir=True)
-fname.add("stc_morphed", "{processed_path}/sub-{subject:02d}/sub-{subject:02d}_cond-{condition}_morphed", mkdir=True)
-fname.add("stc_morphed_hemi", "{processed_path}/sub-{subject:02d}/sub-{subject:02d}_cond-{condition}_morphed-{hemi}.stc", mkdir=True)
+fname.add("stc_morph", "{processed_path}/sub-{subject:02d}/sub-{subject:02d}_cond-{condition}_morphed", mkdir=True)
+fname.add("stc_morph_hemi", "{processed_path}/sub-{subject:02d}/sub-{subject:02d}_cond-{condition}_morphed-{hemi}.stc", mkdir=True)
 fname.add("ga_evokeds", "{processed_path}/grand_average/grand_average_list-ave.fif", mkdir=True)
 fname.add("ga_stc", "{processed_path}/grand_average/grand_average_cond-{condition}", mkdir=True)
 fname.add("ga_stc_hemi", "{processed_path}/grand_average/grand_average_cond-{condition}-{hemi}.stc", mkdir=True)

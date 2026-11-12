@@ -50,3 +50,98 @@ def task_preprocessing():
                     f"python 01_preprocessing.py -sub={sub} -run={run}"
                 ],
             )
+
+def task_sensor_level():
+    """Step 02: Run sensor-level analysis."""
+    for sub in subjects:
+        yield dict(
+            # Give the sub-task a name.
+            name=f"sub-{sub:02d}",
+            file_dep=(
+                [fname.epochs(subject=sub, run=run) for run in runs] +
+                ["02_sensor-level.py"]
+            ),
+            targets=[
+                fname.evokeds(subject=sub),
+            ],
+            actions=[
+                f"python 02_sensor-level.py -sub={sub}"
+            ],
+        )
+
+def task_time_freq():
+    """Step 03: Run time-frequency analysis."""
+    for sub in subjects:
+        yield dict(
+            # Give the sub-task a name.
+            name=f"sub-{sub:02d}",
+            file_dep=(
+                [fname.epochs(subject=sub, run=run) for run in runs] +
+                ["03_time_freq.py"]
+            ),
+            targets=[
+                fname.power(subject=sub),
+                fname.itc(subject=sub),
+            ],
+            actions=[
+                f"python 03_time_freq.py -sub={sub}"
+            ],
+        )
+
+def task_forward():
+    """Step 04: Create the forward head model."""
+    for sub in subjects:
+        yield dict(
+            # Give the sub-task a name.
+            name=f"sub-{sub:02d}",
+            file_dep=[
+                fname.surface(subject=sub, surface="inner_skull"),
+                fname.surface(subject=sub, surface="outer_skull"),
+                fname.surface(subject=sub, surface="outer_skin"),
+                fname.surface(subject=sub, surface="white"),
+                fname.epochs(subject=sub, run=1),
+                "04_forward.py",
+            ],
+            targets=[
+                fname.fwd(subject=sub),
+            ],
+            actions=[
+                f"python 04_forward.py -sub={sub}"
+            ],
+        )
+
+def task_source():
+    """Step 05: Source estimation."""
+    for sub in subjects:
+        yield dict(
+            # Give the sub-task a name.
+            name=f"sub-{sub:02d}",
+            file_dep=[
+                fname.fwd(subject=sub),
+                "05_source.py",
+            ],
+            targets=(
+                [fname.stc_hemi(subject=sub, condition=cond, hemi=hemi) for cond in conditions for hemi in ["lh", "rh"]] +
+                [fname.stc_morph_hemi(subject=sub, condition=cond, hemi=hemi) for cond in conditions for hemi in ["lh", "rh"]]
+            ),
+            actions=[
+                f"python 05_source.py -sub={sub}"
+            ],
+        )
+
+def task_group_level():
+    """Step 06: Group-level analysis."""
+    return dict(
+        file_dep=(
+            [fname.stc_morph_hemi(subject=sub, condition=cond, hemi=hemi) for sub in subjects for cond in conditions for hemi in ["lh", "rh"]] +
+            [fname.evokeds(subject=sub) for sub in subjects] +
+            ["06_group_level.py"]
+        ),
+        targets=(
+            [fname.ga_stc_hemi(condition=cond, hemi=hemi) for cond in conditions for hemi in ["lh", "rh"]] +
+            [fname.ga_evokeds]
+        ),
+        actions=[
+            "python 06_group_level.py"
+        ],
+    )

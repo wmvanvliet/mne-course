@@ -7,51 +7,61 @@ Step 4: create the forward model.
 - Compute the forward model
 """
 
+import argparse
+
 import mne
 
-# Data paths
-data_path = "../data"
-processed_path = "../processed"
-subjects_dir = "../data/freesurfer"
-figure_path = "../figures"
+import config
+from config import fname
+
+# Handle command line arguments
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument("-sub", required=True, type=int, help="The subject to process")
+args = parser.parse_args()
+
+subject = args.sub
+subject_fs = f"sub-{subject:02d}"
 
 # Plot the BEM surfaces.
-fig = mne.viz.plot_bem(subject="sub-01", subjects_dir=subjects_dir)
-fig.savefig(f"{figure_path}/sub-01/bem_surfaces.pdf")
+fig_bem = mne.viz.plot_bem(subject=subject_fs, subjects_dir=fname.subjects_dir)
 
 # Create the BEM solution.
 
 # conductivity = (0.3,)  # for single layer
 conductivity = (0.3, 0.006, 0.3)  # for three layers
 model = mne.make_bem_model(
-    ico=4, conductivity=conductivity, subject="sub-01", subjects_dir=subjects_dir
+    ico=4,
+    conductivity=conductivity,
+    subject=subject_fs,
+    subjects_dir=fname.subjects_dir,
 )
 bem_sol = mne.make_bem_solution(model)
-mne.write_bem_solution(
-    f"{processed_path}/sub-01/sub-01-bem-sol.fif", bem_sol, overwrite=True
-)
+mne.write_bem_solution(fname.bem(subject=subject), bem_sol, overwrite=True)
 
 # Setup the source space.
 src = mne.setup_source_space(
-    subject="sub-01", spacing="oct6", subjects_dir=subjects_dir, n_jobs=-1
+    subject=subject_fs,
+    spacing=config.spacing,
+    subjects_dir=fname.subjects_dir,
+    n_jobs=-1,
 )
-src.save(f"{processed_path}/sub-01/sub-01_src.fif", overwrite=True)
+src.save(fname.src(subject=subject), overwrite=True)
 
 # # Manual co-registration.
 # coreg = mne.gui.coregistration(
-#     subject="sub-01",
-#     subjects_dir=subjects_dir,
-#     inst=f"{data_path}/sub-01/sub-01_ses-meg_task-facerecognition_run-01_meg.fif",
+#     subject=subject_fs,
+#     subjects_dir=fname.subjects_dir,
+#     inst=f"fname.raw(subject=subject, run=3),
 # )
 # trans = coreg.coreg.trans
-# trans.save(f"{processed_path}/sub-01/sub-01_trans.fif", overwrite=True)
+# trans.save(fname.trans(subject=subject), overwrite=True)
 
 # Read a previously performed manual co-registration.
-trans = mne.read_trans(f"{processed_path}/sub-01/sub-01_trans.fif")
+trans = mne.read_trans(fname.trans(subject=subject))
 
 # Compute the forward model.
 fwd = mne.make_forward_solution(
-    f"{data_path}/sub-01/sub-01_ses-meg_task-facerecognition_run-01_meg.fif",
+    fname.epochs(subject=subject),
     trans=trans,
     src=src,
     bem=bem_sol,
@@ -60,15 +70,20 @@ fwd = mne.make_forward_solution(
     mindist=5.0,  # ignore sources <= 5mm from inner skull
     n_jobs=-1,  # number of jobs to run in parallel
 )
-fwd.save(f"{processed_path}/sub-01/sub-01_fwd.fif", overwrite=True)
+fwd.save(fname.fwd(subject=subject), overwrite=True)
 
 # Visualize the entire head model.
-fig = mne.viz.plot_alignment(
+fig_head = mne.viz.plot_alignment(
     info=fwd["info"],
     trans=trans,
     fwd=fwd,
     surfaces=["white", "head"],
-    subject="sub-01",
-    subjects_dir=subjects_dir,
+    subject=subject_fs,
+    subjects_dir=fname.subjects_dir,
 )
-fig.plotter.save_graphic(f"{figure_path}/sub-01/sub-01_head_model.pdf")
+
+# Save the figures in the HTML report.
+with mne.open_report(fname.report(subject=subject)) as report:
+    report.add_figure(fig_bem, "BEM", section="head model")
+    report.add_figure(fig_head, "Head model", section="head model")
+    report.save(fname.report_html(subject=subject), open_browser=False, overwrite=True)

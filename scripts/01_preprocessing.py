@@ -11,7 +11,6 @@ Step 1: Load the raw data and perform preprocessing.
 """
 
 import argparse
-import os
 
 import mne
 
@@ -24,19 +23,19 @@ parser.add_argument("-sub", required=True, type=int, help="The subject to proces
 parser.add_argument("-run", required=True, type=int, help="The run to process")
 args = parser.parse_args()
 
-fname.fill_placeholder("subject", args.sub)
-fname.fill_placeholder("run", args.run)
+subject = args.sub
+run = args.run
 
 # Use the manually pre-selected bad channels in the config file.
 # Alternatively, we can use automatic detection of bad channels.
 current_bads = config.bad_channels.query(
-    f"subject=={args.sub} and run=={args.run}"
+    f"subject=={subject} and run=={run}"
 ).channels.tolist()
 
-print(f"Processing subject {args.sub}, run {args.run}...")
+print(f"Processing subject {subject}, run {run}...")
 
 # Load the raw data.
-raw = mne.io.read_raw(fname.raw(), preload=True)
+raw = mne.io.read_raw(fname.raw(subject=subject, run=run), preload=True)
 
 # Set channel types.
 raw.set_channel_types(
@@ -102,7 +101,7 @@ bads_ecg, ecg_scores = ica.find_bads_ecg(raw_highpass)
 ica.exclude = bads_eog + bads_ecg
 
 # Save the ICA model.
-ica.save(fname.ica, overwrite=True)
+ica.save(fname.ica(subject=subject, run=run), overwrite=True)
 
 # No longer need this.
 del raw_highpass
@@ -128,4 +127,4 @@ epochs_clean = ica.apply(epochs)
 epochs_clean.apply_baseline()  # after ICA, we need to re-do this
 
 # Save the clean epochs.
-epochs_clean.save(fname.epochs(), overwrite=True)
+epochs_clean.save(fname.epochs(subject=subject, run=run), overwrite=True)

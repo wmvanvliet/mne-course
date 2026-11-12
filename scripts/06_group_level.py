@@ -8,23 +8,27 @@ Step 6: Group-level analysis.
 
 import mne
 
-# Data paths
-processed_path = "../processed"
-subjects_dir = "../data/freesurfer"
-figure_path = "../figures"
+from config import conditions, fname, subjects
 
-# Figure out the experimental conditions.
-evokeds = mne.read_evokeds(f"{processed_path}/sub-01/sub-01_list-ave.fif")
-conditions = [ev.comment for ev in evokeds]
+# Average all the sensor-level evokeds.
+ga_evokeds = list()
+for cond in conditions:
+    ga_evoked = mne.grand_average(
+        [
+            mne.read_evokeds(fname.evokeds(subject=sub), condition=cond)
+            for sub in subjects
+        ]
+    )
+    ga_evoked.comment = cond
+    ga_evokeds.append(ga_evoked)
+mne.write_evokeds(fname.ga_evokeds, ga_evokeds, overwrite=True)
 
 # Average all the source estimates.
 stcs = dict()
 n_ave = dict()
 for subject in [1]:
     for cond in conditions:
-        stc = mne.read_source_estimate(
-            f"{processed_path}/sub-{subject:02d}/sub-{subject:02d}_{cond}_fsaverage"
-        )
+        stc = mne.read_source_estimate(fname.stc_morph(subject=subject, condition=cond))
         if cond not in stcs:
             stcs[cond] = stc
             n_ave[cond] = 1
@@ -33,3 +37,7 @@ for subject in [1]:
             n_ave[cond] += 1
 for cond in conditions:
     stcs[cond] /= n_ave[cond]
+
+# Save the grans-average source estimates.
+for cond in conditions:
+    stcs[cond].save(fname.ga_stc(condition=cond), overwrite=True)

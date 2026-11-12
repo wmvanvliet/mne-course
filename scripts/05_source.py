@@ -6,19 +6,25 @@ Step 5: perform source estimation
 - Perform source estimation of the evoked responses for each condition
 """
 
+import argparse
+
 import mne
 
-# Data paths
-processed_path = "../processed"
-subjects_dir = "../data/freesurfer"
-figure_path = "../figures"
+from config import fname
+
+# Handle command line arguments
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument("-sub", required=True, type=int, help="The subject to process")
+args = parser.parse_args()
+
+subject = args.sub
+subject_fs = f"sub-{subject:02d}"
 
 # Load the epochs for all the runs.
 all_epochs = list()
 for run in [1, 2, 3, 4, 5, 6]:
     # Load the epochs
-    epochs_fname = f"{processed_path}/sub-01/sub-01_run-0{run}_epo.fif"
-    epochs = mne.read_epochs(epochs_fname)
+    epochs = mne.read_epochs(fname.epochs(subject=subject, run=run))
     all_epochs.append(epochs)
 epochs = mne.concatenate_epochs(all_epochs)
 del all_epochs
@@ -30,26 +36,27 @@ noise_cov = mne.compute_covariance(
     tmax=0.0,
     rank="info",
 )
-noise_cov.save(f"{processed_path}/sub-01/sub-01_cov.fif", overwrite=True)
+noise_cov.save(fname.cov(subject=subject), overwrite=True)
 
 # Plot some information about the noise covariance matrix.
 fig_cov, fig_rank = mne.viz.plot_cov(noise_cov, info=epochs.info)
-fig_cov.savefig(f"{figure_path}/sub-01/sub-01_cov.pdf")
-fig_rank.savefig(f"{figure_path}/sub-01/sub-01_cov_rank.pdf")
 
 del epochs
 
 # Load the evokeds.
-evokeds = mne.read_evokeds(f"{processed_path}/sub-01/sub-01_list-ave.fif")
+evokeds = mne.read_evokeds(fname.evokeds(subject=subject))
 
 # Compute the inverse operator.
-fwd = mne.read_forward_solution(f"{processed_path}/sub-01/sub-01_fwd.fif")
+fwd = mne.read_forward_solution(fname.fwd(subject=subject))
 info = evokeds[0].info
 inv = mne.minimum_norm.make_inverse_operator(info, fwd, noise_cov, loose=0.2, depth=0.8)
 
 # Prepare morphing to fsaverage template brain.
 morph = mne.compute_source_morph(
-    inv["src"], subject_from="sub-01", subject_to="fsaverage", subjects_dir=subjects_dir
+    inv["src"],
+    subject_from=subject_fs,
+    subject_to="fsaverage",
+    subjects_dir=fname.subjects_dir,
 )
 
 # Perform source estimation.
@@ -58,10 +65,10 @@ for ev in evokeds:
     ev.set_eeg_reference("average", projection=True)  # needed for EEG source estimation
     ev.info["bads"] = ["EEG002"]
     stc = mne.minimum_norm.apply_inverse(ev, inv, lambda2=1 / 9, method="dSPM")
-    stc.save(f"{processed_path}/sub-01/sub-01_{condition}", overwrite=True)
+    stc.save(fname.stc(subject=subject, condition=condition), overwrite=True)
 
     # Morph to fsaverag template brain.
-    stc_fsaverage = morph.apply(stc)
-    stc_fsaverage.save(
-        f"{processed_path}/sub-01/sub-01_{condition}_fsaverage", overwrite=True
+    stc_morph = morph.apply(stc)
+    stc_morph.save(
+        fname.stc_morph(subject=subject, condition=condition), overwrite=True
     )
