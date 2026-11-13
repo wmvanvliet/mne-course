@@ -10,7 +10,6 @@ import getpass
 import os
 from socket import getfqdn
 
-import pandas as pd
 from filename_templates import FileNames
 
 ########################################################################################
@@ -59,7 +58,7 @@ subjects = [
     2,
     3,
     4,
-    5,
+    # 5,  # problem with the MRI
     6,
     7,
     8,
@@ -70,7 +69,7 @@ subjects = [
     13,
     14,
     15,
-    16,
+    # 16,  # problem with the MRI
 ]
 
 # "Runs" are blocks of trials, run during the same session. For example, all the trials
@@ -97,20 +96,18 @@ event_id = {
 conditions = ["face", "unfamiliar", "famous", "scrambled"]
 
 # Manually defined bad channels.
-bad_channels = [
-    dict(subject=1, run=1, channels=["EEG064"]),
-    dict(subject=1, run=2, channels=["EEG064"]),
-    dict(subject=1, run=3, channels=["EEG064"]),
-    dict(subject=1, run=4, channels=["EEG064"]),
-    dict(subject=1, run=5, channels=["EEG064"]),
-    dict(subject=1, run=6, channels=["EEG064"]),
-]
-bad_channels = pd.DataFrame(bad_channels).explode("channels")
-
+# subject -> bad channels
+bad_channels = {
+    1: ["EEG064"],
+}
 
 ########################################################################################
 # Common parameters used in multiple analysis scripts.
 ########################################################################################
+
+# Whether to perform maxfiltering on the data. This can help filter out noise, but also
+# drops a lot of rank in the signal and makes it less suitable for beamforming.
+use_maxfilter = False
 
 # Bandpass filter to apply.
 bandpass = (0.05, 40)
@@ -159,16 +156,16 @@ fname.add("subjects_dir", subjects_dir, mkdir=True)
 # Original raw data.
 fname.add("raw", "{data_path}/sub-{subject:02d}/ses-meg/meg/sub-{subject:02d}_ses-meg_task-facerecognition_run-{run:02d}_meg.fif")
 
-# Freesurfer surfaces.
-fname.add("surface", "{subjects_dir}/sub-{subject:02d}/bem/{surface}.surf")
-
 # Scanner-specific calibration files, after BIDS conversion.
 fname.add("calibration", "{data_path}/derivatives/meg_derivatives/sss_cal.dat")
 fname.add("cross_talk", "{data_path}/derivatives/meg_derivatives/ct_sparse.fif")
 
+# Freesurfer surfaces.
+fname.add("surface", "{subjects_dir}/sub-{subject:02d}/bem/{surface}.surf")
+
 # Files produced by our analysis.
-fname.add("epochs", "{processed_path}/sub-{subject:02d}/sub-{subject:02d}_run-{run:02d}_epo.fif", mkdir=True)
 fname.add("ica", "{processed_path}/sub-{subject:02d}/sub-{subject:02d}_run-{run:02d}_ica.fif", mkdir=True)
+fname.add("epochs", "{processed_path}/sub-{subject:02d}/sub-{subject:02d}_epo.fif", mkdir=True)
 fname.add("evokeds", "{processed_path}/sub-{subject:02d}_list-ave.fif", mkdir=True)
 fname.add("power", "{processed_path}/sub-{subject:02d}/sub-{subject:02d}_power.h5", mkdir=True)
 fname.add("itc", "{processed_path}/sub-{subject:02d}/sub-{subject:02d}_itc.h5", mkdir=True)

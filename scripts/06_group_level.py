@@ -41,3 +41,17 @@ for cond in conditions:
 # Save the grans-average source estimates.
 for cond in conditions:
     stcs[cond].save(fname.ga_stc(condition=cond), overwrite=True)
+
+    # Write STC figures to the HTML report.
+    with mne.open_report(fname.report(subject=subject)) as report:
+        report.add_stc(
+            stcs[cond],
+            title=cond,
+            section="source-level",
+            subject="fsaverage",
+            subjects_dir=fname.subjects_dir,
+            replace=True,
+        )
+        report.save(
+            fname.report_html(subject=subject), open_browser=False, overwrite=True
+        )

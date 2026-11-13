@@ -19,14 +19,7 @@ args = parser.parse_args()
 
 subject = args.sub
 
-# Load the epochs for all the runs.
-all_epochs = list()
-for run in [1, 2, 3, 4, 5, 6]:
-    # Load the epochs
-    epochs = mne.read_epochs(fname.epochs(subject=subject, run=run))
-    all_epochs.append(epochs)
-epochs = mne.concatenate_epochs(all_epochs)
-del all_epochs
+epochs = mne.read_epochs(fname.epochs(subject=subject))
 
 # Compute the power spectrum.
 epochs_psd = epochs.compute_psd(
@@ -71,7 +64,7 @@ fig_itc.set_size_inches(20, 15)
 
 # Save the figures in the HTML report.
 with mne.open_report(fname.report(subject=subject)) as report:
-    report.add_figure(fig_psd, "psd", section="sensor-level")
-    report.add_figure(fig_power, "power", section="sensor-level")
-    report.add_figure(fig_itc, "", section="sensor-level")
+    report.add_figure(fig_psd, "psd", section="sensor-level", replace=True)
+    report.add_figure(fig_power, "power", section="sensor-level", replace=True)
+    report.add_figure(fig_itc, "", section="sensor-level", replace=True)
     report.save(fname.report_html(subject=subject), open_browser=False, overwrite=True)

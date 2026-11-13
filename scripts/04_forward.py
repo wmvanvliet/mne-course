@@ -84,6 +84,6 @@ fig_head = mne.viz.plot_alignment(
 
 # Save the figures in the HTML report.
 with mne.open_report(fname.report(subject=subject)) as report:
-    report.add_figure(fig_bem, "BEM", section="head model")
-    report.add_figure(fig_head, "Head model", section="head model")
+    report.add_figure(fig_bem, "BEM", section="head model", replace=True)
+    report.add_figure(fig_head, "Head model", section="head model", replace=True)
     report.save(fname.report_html(subject=subject), open_browser=False, overwrite=True)

@@ -20,16 +20,8 @@ args = parser.parse_args()
 subject = args.sub
 subject_fs = f"sub-{subject:02d}"
 
-# Load the epochs for all the runs.
-all_epochs = list()
-for run in [1, 2, 3, 4, 5, 6]:
-    # Load the epochs
-    epochs = mne.read_epochs(fname.epochs(subject=subject, run=run))
-    all_epochs.append(epochs)
-epochs = mne.concatenate_epochs(all_epochs)
-del all_epochs
-
 # Compute the noise covariance matrix.
+epochs = mne.read_epochs(fname.epochs(subject=subject))
 noise_cov = mne.compute_covariance(
     epochs,
     tmin=-0.2,  # use the baseline
@@ -41,6 +33,7 @@ noise_cov.save(fname.cov(subject=subject), overwrite=True)
 # Plot some information about the noise covariance matrix.
 fig_cov, fig_rank = mne.viz.plot_cov(noise_cov, info=epochs.info)
 
+# Free up some memory.
 del epochs
 
 # Load the evokeds.
@@ -67,8 +60,22 @@ for ev in evokeds:
     stc = mne.minimum_norm.apply_inverse(ev, inv, lambda2=1 / 9, method="dSPM")
     stc.save(fname.stc(subject=subject, condition=condition), overwrite=True)
 
-    # Morph to fsaverag template brain.
+    # Morph to fsaverage template brain.
     stc_morph = morph.apply(stc)
     stc_morph.save(
         fname.stc_morph(subject=subject, condition=condition), overwrite=True
     )
+
+    # Write STC figures to the HTML report.
+    with mne.open_report(fname.report(subject=subject)) as report:
+        report.add_stc(
+            stc_morph,
+            title=condition,
+            section="source-level",
+            subject="fsaverage",
+            subjects_dir=fname.subjects_dir,
+            replace=True,
+        )
+        report.save(
+            fname.report_html(subject=subject), open_browser=False, overwrite=True
+        )

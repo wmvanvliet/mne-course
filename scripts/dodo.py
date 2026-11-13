@@ -7,7 +7,6 @@ All the filenames are defined in config.py
 # fmt: off
 # ruff:disable[E501]
 
-import config
 from config import conditions, fname, runs, subjects
 
 # Configuration for the "doit" tool.
@@ -32,24 +31,21 @@ def task_check():
 def task_preprocessing():
     """Step 01: Run preprocessing."""
     for sub in subjects:
-        for run in runs:
-            yield dict(
-                # Give the sub-task a name.
-                name=f"sub-{sub:02d}:run-{run:02d}",
-                file_dep=[
-                    fname.raw(subject=sub, run=run),
-                    fname.calibration,
-                    fname.cross_talk,
-                    "01_preprocessing.py",
-                ],
-                targets=[
-                    fname.ica(subject=sub, run=run),
-                    fname.epochs(subject=sub, run=run),
-                ],
-                actions=[
-                    f"python 01_preprocessing.py -sub={sub} -run={run}"
-                ],
-            )
+        yield dict(
+            # Give the sub-task a name.
+            name=f"sub-{sub:02d}",
+            file_dep=(
+                [fname.raw(subject=sub, run=run) for run in runs] +
+                [fname.calibration, fname.cross_talk, "02_preprocessing.py"]
+            ),
+            targets=(
+                [fname.ica(subject=sub, run=run) for run in runs] +
+                [fname.epochs(subject=sub)]
+            ),
+            actions=[
+                f"python 01_preprocessing.py -sub={sub}"
+            ],
+        )
 
 def task_sensor_level():
     """Step 02: Run sensor-level analysis."""
@@ -57,10 +53,10 @@ def task_sensor_level():
         yield dict(
             # Give the sub-task a name.
             name=f"sub-{sub:02d}",
-            file_dep=(
-                [fname.epochs(subject=sub, run=run) for run in runs] +
-                ["02_sensor-level.py"]
-            ),
+            file_dep=[
+                fname.epochs(subject=sub),
+                "02_sensor-level.py",
+            ],
             targets=[
                 fname.evokeds(subject=sub),
             ],
@@ -75,10 +71,10 @@ def task_time_freq():
         yield dict(
             # Give the sub-task a name.
             name=f"sub-{sub:02d}",
-            file_dep=(
-                [fname.epochs(subject=sub, run=run) for run in runs] +
-                ["03_time_freq.py"]
-            ),
+            file_dep=[
+                fname.epochs(subject=sub),
+                "03_time_freq.py",
+            ],
             targets=[
                 fname.power(subject=sub),
                 fname.itc(subject=sub),
@@ -117,6 +113,8 @@ def task_source():
             # Give the sub-task a name.
             name=f"sub-{sub:02d}",
             file_dep=[
+                fname.epochs(subject=sub),
+                fname.evokeds(subject=sub),
                 fname.fwd(subject=sub),
                 "05_source.py",
             ],

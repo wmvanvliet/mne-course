@@ -20,16 +20,9 @@ args = parser.parse_args()
 
 subject = args.sub
 
-# Load the epochs for all the runs.
-all_epochs = list()
-for run in [1, 2, 3, 4, 5, 6]:
-    # Load the epochs
-    epochs = mne.read_epochs(fname.epochs(subject=subject, run=run))
-    all_epochs.append(epochs)
-epochs = mne.concatenate_epochs(all_epochs)
-del all_epochs
 
 # Compute the evoked response for each experimental condition.
+epochs = mne.read_epochs(fname.epochs(subject=subject))
 evokeds = list()
 for condition in ["face", "scrambled", "famous", "unfamiliar"]:
     ev = epochs[condition].average()
@@ -64,5 +57,5 @@ ax[1].legend()
 
 # Save the figure in the HTML report.
 with mne.open_report(fname.report(subject=subject)) as report:
-    report.add_figure(fig, "evokeds", section="sensor-level")
+    report.add_figure(fig, "evokeds", section="sensor-level", replace=True)
     report.save(fname.report_html(subject=subject), open_browser=False, overwrite=True)
