@@ -15,3 +15,4 @@ mne_course_data.zip
 __pycache__
 .*.swp
 .doit.*
+scripts/sbatch/out
