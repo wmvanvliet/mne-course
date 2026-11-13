@@ -11,7 +11,7 @@ import argparse
 import matplotlib.pyplot as plt
 import mne
 
-from config import fname
+from config import evokeds_window, fname
 
 # Handle command line arguments
 parser = argparse.ArgumentParser(description=__doc__)
@@ -20,9 +20,12 @@ args = parser.parse_args()
 
 subject = args.sub
 
-
 # Compute the evoked response for each experimental condition.
 epochs = mne.read_epochs(fname.epochs(subject=subject))
+
+# For the evokeds, we focus on this time window.
+epochs.crop(*evokeds_window)
+
 evokeds = list()
 for condition in ["face", "scrambled", "famous", "unfamiliar"]:
     ev = epochs[condition].average()
@@ -49,6 +52,7 @@ for row, region in enumerate(["frontal", "temporal", "occipital"]):
             picks=channel_group,
             legend=False,
             show=False,
+            sphere="eeg",
             axes=ax,  # draw in these two matplotlib axes objects
         )
         ax[0].set_title(f"{hemi}-{region} (mags)")

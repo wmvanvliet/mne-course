@@ -58,7 +58,7 @@ subjects = [
     2,
     3,
     4,
-    # 5,  # problem with the MRI
+    5,
     6,
     7,
     8,
@@ -69,7 +69,7 @@ subjects = [
     13,
     14,
     15,
-    # 16,  # problem with the MRI
+    16,
 ]
 
 # "Runs" are blocks of trials, run during the same session. For example, all the trials
@@ -98,7 +98,7 @@ conditions = ["face", "unfamiliar", "famous", "scrambled"]
 # Manually defined bad channels.
 # subject -> bad channels
 bad_channels = {
-    1: ["EEG064"],
+    1: ["EEG064", "EEG002"],
 }
 
 ########################################################################################
@@ -115,9 +115,10 @@ bandpass = (0.05, 40)
 # Resample to this frequency.
 resample = 300
 
-# The baseline window for the epochs.
-epochs_window = (-0.2, 2.0)  # in seconds relative to stimulus onset
-baseline = (-0.2, 0)  # in seconds relative to stimulus onset
+# Various analysis windows. In seconds relative to stimulus onset.
+epochs_window = (-1.0, 2.0)
+baseline = (-0.2, 0)
+evokeds_window = (-0.2, 1.0)
 
 # Source "spacing" controlling the resolution of the source estimate.
 # Common choices fow a "low" resolution are: "ico4" or "oct5"

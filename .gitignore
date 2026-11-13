@@ -1,10 +1,11 @@
 .ipynb_checkpoints
+ds000117
 ds000117_pruned
 extra_data_mne
 html
 jupyter_execute
+reports
 tags
-.*.swp
 data
 processed
 figures
@@ -12,4 +13,5 @@ evokeds.pdf
 clear_headpoint.py
 mne_course_data.zip
 __pycache__
-.doit.db
+.*.swp
+.doit.*

@@ -36,7 +36,7 @@ def task_preprocessing():
             name=f"sub-{sub:02d}",
             file_dep=(
                 [fname.raw(subject=sub, run=run) for run in runs] +
-                [fname.calibration, fname.cross_talk, "02_preprocessing.py"]
+                [fname.calibration, fname.cross_talk, "01_preprocessing.py"]
             ),
             targets=(
                 [fname.ica(subject=sub, run=run) for run in runs] +

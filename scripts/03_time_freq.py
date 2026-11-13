@@ -10,6 +10,7 @@ import argparse
 import mne
 import numpy as np
 
+import config
 from config import fname
 
 # Handle command line arguments
@@ -35,12 +36,15 @@ power, itc = epochs.compute_tfr(
     average=True,  # don't return a TFR for each epoch
     return_itc=True,  # also compute ITC
     decim=3,  # for additional speed
-    n_jobs=-1,  # use all CPU cores
+    n_jobs=config.n_jobs,  # use all CPU cores
 )
 
 # Crop to remove edge artifacts.
-power.crop(-0.45, 1.6)
-itc.crop(-0.45, 1.6)
+tmin, tmax = config.epochs_window
+tmin += 0.55
+tmax -= 0.4
+power.crop(tmin, tmax)
+itc.crop(tmin, tmax)
 
 # Saving.
 power.save(fname.power(subject=subject), overwrite=True)
@@ -48,7 +52,7 @@ itc.save(fname.itc(subject=subject), overwrite=True)
 
 # Create a summary figure of the TFR.
 fig_power = power.plot_topo(
-    baseline=[-0.45, -0.1],
+    baseline=[tmin, -0.1],
     mode="meanlogratio",
     title="Average power",
 )
@@ -56,7 +60,7 @@ fig_power.set_size_inches(20, 15)
 
 # Create a summary figure of the ITC.
 fig_itc = itc.plot_topo(
-    baseline=[-0.45, -0.1],
+    baseline=[tmin, -0.1],
     mode="meanlogratio",
     title="Inter-trial coherence",
 )

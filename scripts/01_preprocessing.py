@@ -15,8 +15,7 @@ import argparse
 import mne
 
 import config
-from config import bad_channels, fname, runs
-from move_head import move_head
+from config import fname
 
 # Handle command line arguments
 parser = argparse.ArgumentParser(description=__doc__)
@@ -27,7 +26,7 @@ subject = args.sub
 
 epochs_per_run = list()
 
-for run in runs:
+for run in config.runs:
     print(f"Processing subject {subject}, run {run}...")
 
     # Load the raw data.
@@ -47,7 +46,7 @@ for run in runs:
     raw.rename_channels({"EEG061": "EOG061", "EEG062": "EOG062", "EEG063": "ECG063"})
 
     # Mark "bad" channels
-    raw.info["bads"] = bad_channels.get(subject, list())
+    raw.info["bads"] = config.bad_channels.get(subject, list())
 
     # Set the EEG reference.
     raw.set_eeg_reference(ref_channels="average", projection=False)
@@ -72,24 +71,28 @@ for run in runs:
         ]
     )
 
-    # Apply maxfilter.
+    # Apply maxfilter. For this dataset, we need to estimate the head origin from the
+    # digitized EEG electrodes. Normally, you can leave the `origin` parameter to its
+    # default setting.
+    _, origin, _ = mne.bem.fit_sphere_to_headshape(raw.info, dig_kinds="eeg")
     raw = mne.preprocessing.maxwell_filter(
         raw,
         calibration=fname.calibration,
         cross_talk=fname.cross_talk,
         st_duration=60,
-        destination=fname.raw(run=3),
+        destination=fname.raw(subject=subject, run=3),
+        origin=origin,
     )
 
     # Apply bandpass filter.
-    raw.filter(*config.bandpass)
+    raw.filter(*config.bandpass, n_jobs=config.n_jobs)
 
     # Resample the data to save memory and speed things along.
     raw.resample(config.resample)
 
     # Fit an ICA model to the data.
     raw_highpass = raw.copy().filter(1, None)
-    ica = mne.preprocessing.ICA(0.95, random_state=68454).fit(raw_highpass)
+    ica = mne.preprocessing.ICA(0.95, rng=68454).fit(raw_highpass)
 
     # Mark ICA components associated with EOG and ECG artifacts.
     bads_eog, eog_scores = ica.find_bads_eog(raw_highpass)
@@ -103,7 +106,9 @@ for run in runs:
     del raw_highpass
 
     # Find events.
-    events = mne.find_events(raw, stim_channel="STI101")
+    events = mne.find_events(
+        raw, stim_channel="STI101", min_duration=2 / raw.info["sfreq"]
+    )
 
     # Cut epochs.
     epochs = mne.Epochs(
@@ -120,16 +125,16 @@ for run in runs:
 
     # Apply the ICA to the epochs to clean the artifacts.
     epochs_clean = ica.apply(epochs)
-    epochs_clean.apply_baseline()  # after ICA, we need to re-do this
+    epochs_clean.apply_baseline(config.baseline)  # after ICA, we need to re-do this
 
     # Collect the epochs for each run.
     epochs_per_run.append(epochs_clean)
 
-# When concatenating epochs across runs, the head position inside the helmet must be the
-# same. We will virtually move the head position of all runs to the position of the head
-# during run 3.
-for epochs in epochs_per_run:
-    move_head(epochs, epochs_per_run[2])
-
 # Save the epochs.
+epochs = mne.concatenate_epochs(epochs_per_run)
 epochs.save(fname.epochs(subject=subject), overwrite=True)
+
+# Add a basic plot of the sensor-level signals to the HTML report.
+with mne.open_report(fname.report(subject=subject)) as report:
+    report.add_evokeds(epochs.average(), titles="after cleaning", replace=True)
+    report.save(fname.report_html(subject=subject), open_browser=False, overwrite=True)
