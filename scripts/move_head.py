@@ -58,5 +58,5 @@ def move_head(inst, dest, dig_kinds="auto"):
     mapping = _map_meg_or_eeg_channels(
         info_from, info_to, mode="accurate", origin=origin_head
     )
-    # _do_interp_dots(inst, mapping, picks_from, picks_to)
+    _do_interp_dots(inst, mapping, picks_from, picks_to)
     inst.info["dev_head_t"] = info_to["dev_head_t"]
