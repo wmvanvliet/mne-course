@@ -28,10 +28,14 @@ noise_cov = mne.compute_covariance(
     tmax=0.0,
     rank="info",
 )
-noise_cov.save(fname.cov(subject=subject), overwrite=True)
+noise_cov.save(fname.noise_cov(subject=subject), overwrite=True)
 
 # Plot some information about the noise covariance matrix.
-fig_cov, fig_rank = mne.viz.plot_cov(noise_cov, info=epochs.info)
+with mne.open_report(fname.report(subject=subject)) as report:
+    report.add_covariance(
+        noise_cov, info=epochs.info, title="Noise co-variance", replace=True
+    )
+    report.save(fname.report_html(subject=subject), open_browser=False, overwrite=True)
 
 # Free up some memory.
 del epochs

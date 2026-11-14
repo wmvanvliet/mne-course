@@ -25,6 +25,8 @@ args = parser.parse_args()
 subject = args.sub
 
 epochs_per_run = list()
+fig_eog_scores_per_run = list()
+fig_ecg_scores_per_run = list()
 
 for run in config.runs:
     print(f"Processing subject {subject}, run {run}...")
@@ -33,17 +35,7 @@ for run in config.runs:
     raw = mne.io.read_raw(fname.raw(subject=subject, run=run), preload=True)
 
     # Set channel types.
-    raw.set_channel_types(
-        {
-            "EEG061": "eog",  # actually EOG not EEG
-            "EEG062": "eog",  # actually EOG not EEG
-            "EEG063": "ecg",  # actually ECG not EEG
-            "EEG064": "misc",
-        }
-    )  # EEG064 free-floating electrode
-
-    # We also rename the EOG and ECG channels.
-    raw.rename_channels({"EEG061": "EOG061", "EEG062": "EOG062", "EEG063": "ECG063"})
+    raw.set_channel_types({"EEG064": "misc"})  # EEG064 free-floating electrode
 
     # Mark "bad" channels
     raw.info["bads"] = config.bad_channels.get(subject, list())
@@ -92,12 +84,18 @@ for run in config.runs:
 
     # Fit an ICA model to the data.
     raw_highpass = raw.copy().filter(1, None)
-    ica = mne.preprocessing.ICA(0.95, rng=68454).fit(raw_highpass)
+    ica = mne.preprocessing.ICA(40, rng=68454).fit(raw_highpass)
 
     # Mark ICA components associated with EOG and ECG artifacts.
     bads_eog, eog_scores = ica.find_bads_eog(raw_highpass)
     bads_ecg, ecg_scores = ica.find_bads_ecg(raw_highpass)
     ica.exclude = bads_eog + bads_ecg
+    fig_eog_scores_per_run.append(
+        ica.plot_scores(eog_scores, bads_eog, title=f"EOG run-{run}")
+    )
+    fig_ecg_scores_per_run.append(
+        ica.plot_scores(eog_scores, bads_ecg, title=f"ECG run-{run}")
+    )
 
     # Save the ICA model.
     ica.save(fname.ica(subject=subject, run=run), overwrite=True)
@@ -136,5 +134,19 @@ epochs.save(fname.epochs(subject=subject), overwrite=True)
 
 # Add a basic plot of the sensor-level signals to the HTML report.
 with mne.open_report(fname.report(subject=subject)) as report:
-    report.add_evokeds(epochs.average(), titles="after cleaning", replace=True)
+    report.add_figure(
+        fig_eog_scores_per_run,
+        title="EOG scores",
+        section="preprocessing",
+        replace=True,
+    )
+    report.add_figure(
+        fig_ecg_scores_per_run,
+        title="EOG scores",
+        section="preprocessing",
+        replace=True,
+    )
+    report.add_evokeds(
+        epochs.average(), titles="after cleaning", section="preprocessing", replace=True
+    )
     report.save(fname.report_html(subject=subject), open_browser=False, overwrite=True)

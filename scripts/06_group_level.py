@@ -26,7 +26,7 @@ mne.write_evokeds(fname.ga_evokeds, ga_evokeds, overwrite=True)
 # Average all the source estimates.
 stcs = dict()
 n_ave = dict()
-for subject in [1]:
+for subject in subjects:
     for cond in conditions:
         stc = mne.read_source_estimate(fname.stc_morph(subject=subject, condition=cond))
         if cond not in stcs:
@@ -43,7 +43,7 @@ for cond in conditions:
     stcs[cond].save(fname.ga_stc(condition=cond), overwrite=True)
 
     # Write STC figures to the HTML report.
-    with mne.open_report(fname.report(subject=subject)) as report:
+    with mne.open_report(fname.ga_report) as report:
         report.add_stc(
             stcs[cond],
             title=cond,
@@ -53,5 +53,5 @@ for cond in conditions:
             replace=True,
         )
         report.save(
-            fname.report_html(subject=subject), open_browser=False, overwrite=True
+            fname.ga_report_html, open_browser=False, overwrite=True
         )

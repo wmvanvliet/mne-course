@@ -20,26 +20,29 @@ user = getpass.getuser()  # Username of the user running the scripts
 host = getfqdn()  # Hostname of the machine running the scripts
 
 # You want to add your machine to this list.
-# orig_data_path - Folder containing the original data recorded during the project.
-# bids_path - Folder containing the BIDS version of the data.
-# processed_data_path - Folder to write the processed MEG data to.
-# subject_dir - Folder for the MRIs that have been processed with FreeSurfer
+# data_path - Folder containing the original ds000117 data.
+# processed_path - Folder to write the processed MEG data to.
+# reports_path - Folder to write the HTML reports to.
 # n_jobs - number of CPU cores to use
-if host == "deepthought1" and user == "vanvlm1":
+if host == "deepthought1":
     # Marijn's workstation
-    data_path = "/m/nbe/scratch/conpy/ds000117"
+    data_path = "../ds000117"
     processed_path = "../processed"
     reports_path = "../reports"
-    subjects_dir = "/m/nbe/scratch/conpy/ds000117/derivatives/freesurfer"
     n_jobs = 32
-elif "marijn-laptop" in host and user == "vanvlm1":
+elif host == "marijn-laptop":
     # Marijn's Linux laptop:
     data_path = "/m/nbe/scratch/conpy/ds000117"
     processed_path = "../processed"
     reports_path = "../reports"
-    subjects_dir = "/m/nbe/scratch/conpy/ds000117/derivatives/freesurfer"
     n_jobs = 14
     os.environ["QT_QPA_PLATFORM"] = "xcb"  # needed for 3d graphics to work
+elif "triton" in host:
+    # Aalto's Triton HPC cluster
+    data_path = "/m/nbe/scratch/conpy/ds000117"
+    processed_path = "../processed"
+    reports_path = "../reports"
+    n_jobs = 1
 else:
     raise ValueError(f"Please add your system to config.py ({user=} {host=}).")
 
@@ -152,26 +155,27 @@ fname = FileNames()
 fname.add("data_path", data_path)
 fname.add("processed_path", processed_path, mkdir=True)
 fname.add("reports_path", reports_path, mkdir=True)
-fname.add("subjects_dir", subjects_dir, mkdir=True)
 
 # Original raw data.
 fname.add("raw", "{data_path}/sub-{subject:02d}/ses-meg/meg/sub-{subject:02d}_ses-meg_task-facerecognition_run-{run:02d}_meg.fif")
 
-# Scanner-specific calibration files, after BIDS conversion.
-fname.add("calibration", "{data_path}/derivatives/meg_derivatives/sss_cal.dat")
-fname.add("cross_talk", "{data_path}/derivatives/meg_derivatives/ct_sparse.fif")
+# Scanner-specific calibration files. Same for each subject.
+fname.add("calibration", "{data_path}/sub-01/ses-meg/meg/sub-01_ses-meg_acq-calibration_meg.dat")
+fname.add("cross_talk", "{data_path}/sub-01/ses-meg/meg/sub-01_ses-meg_acq-crosstalk_meg.fif")
 
-# Freesurfer surfaces.
-fname.add("surface", "{subjects_dir}/sub-{subject:02d}/bem/{surface}.surf")
+# Freesurfer files.
+fname.add("subjects_dir", "{data_path}/derivatives/freesurfer")
+fname.add("surface", "{subjects_dir}/sub-{subject:02d}/surf/{hemi}.{surface}")
+fname.add("bem_surface", "{subjects_dir}/sub-{subject:02d}/bem/{surface}.surf")
+fname.add("trans", "{subjects_dir}/sub-{subject:02d}/sub-{subject:02d}_trans.fif", mkdir=True)
 
 # Files produced by our analysis.
 fname.add("ica", "{processed_path}/sub-{subject:02d}/sub-{subject:02d}_run-{run:02d}_ica.fif", mkdir=True)
 fname.add("epochs", "{processed_path}/sub-{subject:02d}/sub-{subject:02d}_epo.fif", mkdir=True)
-fname.add("evokeds", "{processed_path}/sub-{subject:02d}_list-ave.fif", mkdir=True)
+fname.add("evokeds", "{processed_path}/sub-{subject:02d}/sub-{subject:02d}_list-ave.fif", mkdir=True)
 fname.add("power", "{processed_path}/sub-{subject:02d}/sub-{subject:02d}_power.h5", mkdir=True)
 fname.add("itc", "{processed_path}/sub-{subject:02d}/sub-{subject:02d}_itc.h5", mkdir=True)
 fname.add("bem_sol", "{processed_path}/sub-{subject:02d}/sub-{subject:02d}_bem-sol.fif", mkdir=True)
-fname.add("trans", "{processed_path}/sub-{subject:02d}/sub-{subject:02d}_trans.fif", mkdir=True)
 fname.add("src", "{processed_path}/sub-{subject:02d}/sub-{subject:02d}_src.fif", mkdir=True)
 fname.add("fwd", "{processed_path}/sub-{subject:02d}/sub-{subject:02d}_fwd.fif", mkdir=True)
 fname.add("noise_cov", "{processed_path}/sub-{subject:02d}/sub-{subject:02d}_cov.fif", mkdir=True)
@@ -199,4 +203,4 @@ fname.add("system_check", "./.system_check.txt")
 # Add `subjects_dir` as an environment variable for convenience. This way, you don't
 # have to specify `subjects_dir=subjects_dir` all the time when using MNE-Python
 # functions.
-os.environ["SUBJECTS_DIR"] = subjects_dir
+os.environ["SUBJECTS_DIR"] = str(fname.subjects_dir)

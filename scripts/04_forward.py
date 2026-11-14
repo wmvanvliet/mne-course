@@ -47,14 +47,14 @@ src = mne.setup_source_space(
 )
 src.save(fname.src(subject=subject), overwrite=True)
 
-# Manual co-registration.
-coreg = mne.gui.coregistration(
-    subject=subject_fs,
-    subjects_dir=fname.subjects_dir,
-    inst=fname.raw(subject=subject, run=3),
-)
-trans = coreg.coreg.trans
-trans.save(fname.trans(subject=subject), overwrite=True)
+# # Manual co-registration.
+# coreg = mne.gui.coregistration(
+#     subject=subject_fs,
+#     subjects_dir=fname.subjects_dir,
+#     inst=fname.raw(subject=subject, run=3),
+# )
+# trans = coreg.coreg.trans
+# trans.save(fname.trans(subject=subject), overwrite=True)
 
 # Read a previously performed manual co-registration.
 trans = mne.read_trans(fname.trans(subject=subject))

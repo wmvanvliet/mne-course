@@ -1,6 +1,5 @@
 """
-Do-it script to execute the entire pipeline using the doit tool:
-http://pydoit.org
+Do-it script to execute the entire pipeline using the doit tool: http://pydoit.org.
 
 All the filenames are defined in config.py
 """
@@ -91,14 +90,18 @@ def task_forward():
             # Give the sub-task a name.
             name=f"sub-{sub:02d}",
             file_dep=[
-                fname.surface(subject=sub, surface="inner_skull"),
-                fname.surface(subject=sub, surface="outer_skull"),
-                fname.surface(subject=sub, surface="outer_skin"),
-                fname.surface(subject=sub, surface="white"),
-                fname.epochs(subject=sub, run=1),
+                fname.bem_surface(subject=sub, surface="inner_skull"),
+                fname.bem_surface(subject=sub, surface="outer_skull"),
+                fname.bem_surface(subject=sub, surface="outer_skin"),
+                fname.surface(subject=sub, surface="white", hemi="lh"),
+                fname.surface(subject=sub, surface="white", hemi="rh"),
+                fname.trans(subject=sub),
+                fname.epochs(subject=sub),
                 "04_forward.py",
             ],
             targets=[
+                fname.bem_sol(subject=sub),
+                fname.src(subject=sub),
                 fname.fwd(subject=sub),
             ],
             actions=[

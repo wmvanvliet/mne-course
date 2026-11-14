@@ -26,7 +26,7 @@ epochs = mne.read_epochs(fname.epochs(subject=subject))
 epochs_psd = epochs.compute_psd(
     method="multitaper", fmin=2.0, fmax=40.0, bandwidth=2.0, n_jobs=-1
 )
-fig_psd = epochs_psd.plot()
+fig_psd = epochs_psd.plot(show=False)
 
 # Compute time-frequency using Morlet wavelets.
 power, itc = epochs.compute_tfr(
@@ -55,6 +55,7 @@ fig_power = power.plot_topo(
     baseline=[tmin, -0.1],
     mode="meanlogratio",
     title="Average power",
+    show=False,
 )
 fig_power.set_size_inches(20, 15)
 
@@ -63,6 +64,7 @@ fig_itc = itc.plot_topo(
     baseline=[tmin, -0.1],
     mode="meanlogratio",
     title="Inter-trial coherence",
+    show=False,
 )
 fig_itc.set_size_inches(20, 15)
 
