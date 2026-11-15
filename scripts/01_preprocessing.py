@@ -91,10 +91,10 @@ for run in config.runs:
     bads_ecg, ecg_scores = ica.find_bads_ecg(raw_highpass)
     ica.exclude = bads_eog + bads_ecg
     fig_eog_scores_per_run.append(
-        ica.plot_scores(eog_scores, bads_eog, title=f"EOG run-{run}")
+        ica.plot_scores(eog_scores, bads_eog, title=f"EOG run-{run}", show=False)
     )
     fig_ecg_scores_per_run.append(
-        ica.plot_scores(eog_scores, bads_ecg, title=f"ECG run-{run}")
+        ica.plot_scores(ecg_scores, bads_ecg, title=f"ECG run-{run}", show=False)
     )
 
     # Save the ICA model.
@@ -142,11 +142,11 @@ with mne.open_report(fname.report(subject=subject)) as report:
     )
     report.add_figure(
         fig_ecg_scores_per_run,
-        title="EOG scores",
+        title="ECG scores",
         section="preprocessing",
         replace=True,
     )
     report.add_evokeds(
-        epochs.average(), titles="after cleaning", section="preprocessing", replace=True
+        epochs.average(), titles="after cleaning", replace=True
     )
     report.save(fname.report_html(subject=subject), open_browser=False, overwrite=True)
