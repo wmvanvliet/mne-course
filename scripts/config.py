@@ -101,7 +101,8 @@ conditions = ["face", "unfamiliar", "famous", "scrambled"]
 # Manually defined bad channels.
 # subject -> bad channels
 bad_channels = {
-    1: ["EEG064", "EEG002"],
+    1: ["EEG002", "EEG064"],
+    2: ["MEG1342", "EEG027", "EEG030", "EEG038", "EEG041", "EEG064"],
 }
 
 ########################################################################################
@@ -113,7 +114,7 @@ bad_channels = {
 use_maxfilter = False
 
 # Bandpass filter to apply.
-bandpass = (0.05, 40)
+bandpass = (1, 40)
 
 # Resample to this frequency.
 resample = 300

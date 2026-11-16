@@ -40,9 +40,6 @@ for run in config.runs:
     # Mark "bad" channels
     raw.info["bads"] = config.bad_channels.get(subject, list())
 
-    # Set the EEG reference.
-    raw.set_eeg_reference(ref_channels="average", projection=False)
-
     # Drop some superfluous channels.
     raw.drop_channels(
         [
@@ -79,12 +76,19 @@ for run in config.runs:
     # Apply bandpass filter.
     raw.filter(*config.bandpass, n_jobs=config.n_jobs)
 
+    # These recordings have a weird 26Hz signal in them.
+    if subject in [2]:
+        raw.notch_filter(26)
+
     # Resample the data to save memory and speed things along.
     raw.resample(config.resample)
 
+    # Set the EEG reference.
+    raw.set_eeg_reference(ref_channels="average", projection=False)
+
     # Fit an ICA model to the data.
     raw_highpass = raw.copy().filter(1, None)
-    ica = mne.preprocessing.ICA(40, rng=68454).fit(raw_highpass)
+    ica = mne.preprocessing.ICA(60, rng=68454).fit(raw_highpass)
 
     # Mark ICA components associated with EOG and ECG artifacts.
     bads_eog, eog_scores = ica.find_bads_eog(raw_highpass)
@@ -118,9 +122,6 @@ for run in config.runs:
         preload=True,
     )
 
-    # Account for projector delay.
-    epochs.shift_time(0.034)
-
     # Apply the ICA to the epochs to clean the artifacts.
     epochs_clean = ica.apply(epochs)
     epochs_clean.apply_baseline(config.baseline)  # after ICA, we need to re-do this
@@ -128,25 +129,31 @@ for run in config.runs:
     # Collect the epochs for each run.
     epochs_per_run.append(epochs_clean)
 
-# Save the epochs.
+# Concatenate the epochs across the runs.
 epochs = mne.concatenate_epochs(epochs_per_run)
+
+# One more pass to drop obviously bad epochs.
+epochs.drop_bad(reject=dict(grad=4000e-13, mag=4e-12, eeg=150e-6))
+
+# Account for projector delay.
+epochs.shift_time(0.034)
+
+# Save the epochs.
 epochs.save(fname.epochs(subject=subject), overwrite=True)
 
 # Add a basic plot of the sensor-level signals to the HTML report.
 with mne.open_report(fname.report(subject=subject)) as report:
     report.add_figure(
-        fig_eog_scores_per_run,
-        title="EOG scores",
-        section="preprocessing",
-        replace=True,
+        fig_eog_scores_per_run, title="EOG", section="preprocessing", replace=True
     )
     report.add_figure(
-        fig_ecg_scores_per_run,
-        title="ECG scores",
+        fig_ecg_scores_per_run, title="ECG", section="preprocessing", replace=True
+    )
+    report.add_figure(
+        epochs.plot_drop_log(show=False),
+        title="Drop log",
         section="preprocessing",
         replace=True,
     )
-    report.add_evokeds(
-        epochs.average(), titles="after cleaning", replace=True
-    )
+    report.add_evokeds(epochs.average(), titles="after cleaning", replace=True)
     report.save(fname.report_html(subject=subject), open_browser=False, overwrite=True)
