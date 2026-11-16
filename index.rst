@@ -113,3 +113,7 @@ To cite the MNE-Python package, please use:
 *A. Gramfort, M. Luessi, E. Larson, D. Engemann, D. Strohmeier, C. Brodbeck, R. Goj, M. Jas,
 T. Brooks, L. Parkkonen, M. Hämäläinen, MEG and EEG data analysis with MNE-Python,
 Frontiers in Neuroscience, Volume 7, 2013, ISSN 1662-453X.*
+
+The example analysis pipeline is inspired from this article:
+
+*van Vliet, M. (2020). Seven quick tips for data analysis pipelines in neuroimaging. PLOS Computational Biology, 16(3), e1007358. https://doi.org/10.1371/journal.pcbi.1007358*
