@@ -68,7 +68,7 @@ for run in config.runs:
         raw,
         calibration=fname.calibration,
         cross_talk=fname.cross_talk,
-        st_duration=60,
+        st_duration=None,  # set to 60 to enable tSSS
         destination=fname.raw(subject=subject, run=3),
         origin=origin,
     )
@@ -88,7 +88,7 @@ for run in config.runs:
 
     # Fit an ICA model to the data.
     raw_highpass = raw.copy().filter(1, None)
-    ica = mne.preprocessing.ICA(60, rng=68454).fit(raw_highpass)
+    ica = mne.preprocessing.ICA(40, rng=68454).fit(raw_highpass)
 
     # Mark ICA components associated with EOG and ECG artifacts.
     bads_eog, eog_scores = ica.find_bads_eog(raw_highpass)
