@@ -27,7 +27,7 @@ host = getfqdn()  # Hostname of the machine running the scripts
 if host == "deepthought1":
     # Marijn's workstation
     data_path = "../ds000117"
-    processed_path = "../processed"
+    processed_path = "../ds000117/derivatives/example_pipeline"
     reports_path = "../reports"
     n_jobs = 32
 elif host == "marijn-laptop":
@@ -47,7 +47,7 @@ elif "Laptop-Marijn.org.aalto.fi" in host and user =="wmvan":
 elif "triton" in host:
     # Aalto's Triton HPC cluster
     data_path = "/m/nbe/scratch/conpy/ds000117"
-    processed_path = "../processed"
+    processed_path = "/m/nbe/scratch/conpy/ds000117/derivatives/example_pipeline"
     reports_path = "../reports"
     n_jobs = 1
 else:
