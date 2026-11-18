@@ -33,4 +33,5 @@ html_title = project
 # Files to ignore.
 exclude_patterns = [
     "jupyter_execute/**",
+    "README.md",
 ]
