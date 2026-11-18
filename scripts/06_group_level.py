@@ -38,7 +38,7 @@ for subject in subjects:
 for cond in conditions:
     stcs[cond] /= n_ave[cond]
 
-# Save the grans-average source estimates.
+# Save the grand-average source estimates.
 for cond in conditions:
     stcs[cond].save(fname.ga_stc(condition=cond), overwrite=True)
 
