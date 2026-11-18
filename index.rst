@@ -87,7 +87,7 @@ For this, we recommend taking a proper university-level neuroimaging course, suc
 Aalto University: `NBE-E4045 Functional Brain Imaging D (5 cr) <https://sisu.aalto.fi/student/courseunit/otm-ef8f2dea-edd6-4651-8702-f61dedaa9c2c/brochure>`__. 
 
 To get started with your own data analysis pipelines, it is helpful to have an example pipeline to copy from.
-`This git repository <https://version.aalto.fi/gitlab/biomag-pipelines/mne-standard/-/tree/minimal?ref_type=heads>`__ contains such an example pipeline, in three flavors: minimal, advanced, and expert.
+`This git repository <https://github.com/wmvanvliet/mne-example-pipeline>`__ contains such an example pipeline, in three flavors: minimal, advanced, and expert.
 Each flavor adds more bells and whistles to the pipeline to make it more complete and robust.
 
 
