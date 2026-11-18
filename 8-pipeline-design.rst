@@ -115,7 +115,7 @@ The example pipeline uses the `filename_templates <https://github.com/wmvanvliet
 Some notable features:
 
 - We give filenames a short "handle" to refer to them, saving us typing out long file paths.
-- We store filename templates with placeholder values to be filled-in when the filename is used, using the same formatting system as Python's `f-strings <https://docs.python.org/3/library/argparse.html>`_. Placeholders with the same name as filenames specified earlier are automatically filled-in (e.g. ``data_path`` and ``processed_path``).
+- We store filename templates with placeholder values to be filled-in when the filename is used, using the same formatting system as Python's `f-strings <https://docs.python.org/3/library/string.html#formatexamples>`_. Placeholders with the same name as filenames specified earlier are automatically filled-in (e.g. ``data_path`` and ``processed_path``).
 - By specifying ``mkdir=True``, the system checks when a filename is accessed whether the parent folder exists, and creates it if it does not.
 
 Each script operates on a single subject

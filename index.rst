@@ -1,11 +1,3 @@
-TODO:
- - update link to openneuro-py
- - update link to python f-strings
- - Upload new data package to gdrive
- - Upload new HTML to public_html
- - Push latest version to github
- - Send email to Gwénaël
-
 Material for the MNE-Python course
 ==================================
 
@@ -75,7 +67,7 @@ Executing the full example analysis pipeline
 You can find a full example analysis pipeline in the ``scripts`` folder of the lesson materials.
 To run it for yourself, will need the ``doit`` and ``filename_templates`` packages, which can be installed through PIP: ``pip install doit filename_templates``.
 You will also need to download the entire Wakeman and Henson (2025) dataset (version 2): https://openneuro.org/datasets/ds000117/.
-A convenient way to download datasets from openneuro is with the help of the `openneuro-py <>`_ package.
+A convenient way to download datasets from openneuro is with the help of the `openneuro-py <https://github.com/openneuro-py/openneuro-py>`_ package.
 In addition, you need the FreeSurfer derivatives for that dataset (4.3GB): :download:`download <https://drive.google.com/file/d/1de-D9gppug1LJl-oa8o-Ncg1gscEx3fV/view?usp=sharing>`.
 Extract it inside the ``ds000117`` folder.
 
