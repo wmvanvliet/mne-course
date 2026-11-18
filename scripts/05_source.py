@@ -10,6 +10,7 @@ import argparse
 
 import mne
 
+import config
 from config import fname
 
 # Handle command line arguments
@@ -42,6 +43,7 @@ del epochs
 
 # Load the evokeds.
 evokeds = mne.read_evokeds(fname.evokeds(subject=subject))
+evokeds = [ev.crop(*config.stc_window) for ev in evokeds]
 
 # Compute the inverse operator.
 fwd = mne.read_forward_solution(fname.fwd(subject=subject))
@@ -54,6 +56,7 @@ morph = mne.compute_source_morph(
     subject_from=subject_fs,
     subject_to="fsaverage",
     subjects_dir=fname.subjects_dir,
+    spacing=4,
 )
 
 # Perform source estimation.

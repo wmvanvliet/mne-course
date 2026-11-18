@@ -130,6 +130,7 @@ resample = 300
 epochs_window = (-1.0, 2.0)
 baseline = (-0.2, 0)
 evokeds_window = (-0.2, 1.0)
+stc_window = (0, 0.5)
 
 # Source "spacing" controlling the resolution of the source estimate.
 # Common choices fow a "low" resolution are: "ico4" or "oct5"
