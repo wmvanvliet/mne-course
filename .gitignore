@@ -16,3 +16,5 @@ __pycache__
 .*.swp
 .doit.*
 scripts/sbatch/out
+freesurfer_full
+ds000117_freesurfer.zip
