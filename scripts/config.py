@@ -37,7 +37,7 @@ elif host == "marijn-laptop":
     reports_path = "../reports"
     n_jobs = 14
     os.environ["QT_QPA_PLATFORM"] = "xcb"  # needed for 3d graphics to work
-elif "Laptop-Marijn.org.aalto.fi" in host and user =="wmvan":
+elif "Laptop-Marijn" in host and user =="wmvan":
     # Marijn's Windows laptop:
     data_path = "S:/nbe/conpy/ds000117"
     processed_path = "../processed"
