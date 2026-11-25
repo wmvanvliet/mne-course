@@ -93,8 +93,14 @@ To get started with your own data analysis pipelines, it is helpful to have an e
 Each flavor adds more bells and whistles to the pipeline to make it more complete and robust.
 
 
-References and credit
-~~~~~~~~~~~~~~~~~~~~~
+Licensing and credit
+~~~~~~~~~~~~~~~~~~~~
+.. image:: http://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png
+These lesson materials are licensed according to the Creative Common License, type: Attribution-NonCommercial-ShareAlike (CC BY-NC-SA).
+This license lets others remix, tweak, and build upon your work non-commercially, as long as they credit the original authors and license their new creations under the identical terms.
+
+`View License Deed <https://creativecommons.org/licenses/by-nc-nd/4.0>`_ | `View Legal Code <https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode>`_
+
 The code from this tutorial is heavily inspired from this article:
 
 Mainak Jas, Eric Larson, Denis Engemann, Jaakko Leppakangas, Samu Taulu, Matti Hämäläinen,
